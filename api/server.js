@@ -13,6 +13,20 @@ server.use(cors());
 server.use(express.json());
 
 server.use('/api/auth', authRouter);
-server.use('/api/jokes', authenticate, jokesRouter);
+server.use('/api/jokes', authenticate, checkRole('user'), jokesRouter);
 
 module.exports = server;
+
+function checkRole(role) {
+    return (req, res, next) => {
+        if (
+            req.decodedToken &&
+            req.decodedToken.role &&
+            req.decodedToken.role.toLowerCase() === role
+        ) {
+            next();
+        } else {
+            res.status(403).json({ you: "shall not pass!" });
+        }
+    };
+}
